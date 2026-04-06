@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tidō — To-Do App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #dce8f5;
+  --bg-dark: #c8d8ec;
+  --bg-light: #eaf3fd;
+  --nm-out: 6px 6px 14px #b0c4db, -6px -6px 14px #ffffff;
+  --nm-in:  inset 4px 4px 10px #b0c4db, inset -4px -4px 10px #ffffff;
+  --nm-btn: 4px 4px 10px #b0c4db, -4px -4px 10px #ffffff;
+  --nm-btn-press: inset 3px 3px 8px #b0c4db, inset -3px -3px 8px #ffffff;
+  --accent: #2b8fd4;
+  --accent-lt: #5aaee8;
+  --accent-dk: #1a6aab;
+  --teal: #1aabaa;
+  --coral: #e06060;
+  --amber: #e0a030;
+  --success: #2aac74;
+  --text1: #1c3a5c;
+  --text2: #4a6a8a;
+  --text3: #7a9ab8;
+  --font: 'Nunito', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --r: 16px;
+  --rsm: 10px;
+  --rxl: 24px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #c8d8ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: var(--font);
+}
+
+#app {
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--text1);
+  display: flex;
+  width: 860px;
+  height: 680px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 16px 16px 40px #a8bcce, -16px -16px 40px #ffffff;
+}
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width: 230px;
+  min-width: 230px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 14px 18px;
+  gap: 4px;
+  border-right: 1px solid rgba(176,196,219,0.5);
+}
+
+.logo-wrap { display: flex; align-items: center; gap: 10px; padding: 0 6px 20px; }
+.logo-nm {
+  width: 38px; height: 38px;
+  border-radius: 12px;
+  background: var(--bg);
+  box-shadow: var(--nm-btn);
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-inner {
+  width: 18px; height: 18px;
+  background: linear-gradient(135deg, var(--accent), var(--teal));
+  border-radius: 5px;
+}
+.logo-text { font-size: 18px; font-weight: 700; color: var(--text1); letter-spacing: -0.5px; }
+
+.sec-label {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--text3); padding: 8px 8px 4px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 12px; border-radius: var(--rsm);
+  cursor: pointer; transition: all 0.18s;
+  font-size: 13px; font-weight: 500; color: var(--text2);
+  background: var(--bg); box-shadow: none;
+  user-select: none;
+}
+.nav-item:hover { box-shadow: var(--nm-btn); color: var(--text1); }
+.nav-item.active { box-shadow: var(--nm-in); color: var(--accent); }
+
+.nav-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.15);
+}
+.nav-count {
+  margin-left: auto; font-size: 11px;
+  font-family: var(--mono); color: var(--text3);
+  background: var(--bg); box-shadow: var(--nm-in);
+  padding: 1px 7px; border-radius: 20px;
+}
+.nav-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.add-list-nm {
+  margin-top: 6px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px; border-radius: var(--rsm);
+  background: var(--bg); border: none;
+  font-family: var(--font); font-size: 12px; font-weight: 600;
+  color: var(--text3); cursor: pointer;
+  transition: all 0.18s;
+}
+.add-list-nm:hover { box-shadow: var(--nm-btn); color: var(--accent); }
+
+.plus-circle {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--bg);
+  box-shadow: 2px 2px 5px #b0c4db, -2px -2px 5px #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; color: var(--accent); line-height: 1;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  border-top: 1px solid rgba(176,196,219,0.4);
+  padding-top: 14px;
+}
+.theme-row { display: flex; align-items: center; gap: 8px; padding: 0 6px; }
+.theme-lbl {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text3); flex: 1;
+}
+.t-dot {
+  width: 20px; height: 20px; border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px #b0c4db, -2px -2px 5px #fff;
+  transition: all 0.15s;
+}
+.t-dot.on { box-shadow: var(--nm-in); transform: scale(0.88); }
+
+/* ── MAIN ── */
+#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+
+#topbar {
+  padding: 22px 24px 14px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid rgba(176,196,219,0.4);
+}
+.main-title { font-size: 20px; font-weight: 700; color: var(--text1); flex: 1; letter-spacing: -0.3px; }
+
+.filter-nm {
+  background: var(--bg); border: none; border-radius: var(--rsm);
+  font-family: var(--font); font-size: 12px; font-weight: 600;
+  color: var(--text3); padding: 7px 13px; cursor: pointer;
+  transition: all 0.15s; box-shadow: var(--nm-btn);
+}
+.filter-nm:hover { color: var(--text2); }
+.filter-nm.on { box-shadow: var(--nm-in); color: var(--accent); }
+
+.clear-nm {
+  background: var(--bg); border: none; border-radius: var(--rsm);
+  font-family: var(--font); font-size: 12px; font-weight: 600;
+  color: var(--text3); padding: 7px 13px; cursor: pointer;
+  transition: all 0.15s; box-shadow: var(--nm-btn);
+}
+.clear-nm:hover { color: var(--coral); box-shadow: var(--nm-in); }
+
+/* ── ADD BAR ── */
+#add-bar {
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(176,196,219,0.3);
+}
+.add-nm-row { display: flex; gap: 8px; align-items: center; }
+.nm-input {
+  flex: 1; background: var(--bg); border: none; border-radius: var(--rsm);
+  box-shadow: var(--nm-in); font-family: var(--font); font-size: 13px;
+  color: var(--text1); padding: 11px 14px; outline: none;
+  transition: box-shadow 0.18s;
+}
+.nm-input:focus { box-shadow: inset 4px 4px 10px #a8bcd4, inset -4px -4px 10px #ffffff; }
+.nm-input::placeholder { color: var(--text3); }
+
+.nm-dt {
+  background: var(--bg); border: none; border-radius: var(--rsm);
+  box-shadow: var(--nm-in); font-family: var(--mono); font-size: 11px;
+  color: var(--text2); padding: 11px 10px; outline: none;
+  width: 150px; transition: box-shadow 0.18s;
+}
+.nm-dt:focus { box-shadow: inset 4px 4px 10px #a8bcd4, inset -4px -4px 10px #ffffff; }
+
+.add-nm-btn {
+  background: var(--bg); border: none; border-radius: var(--rsm);
+  font-family: var(--font); font-size: 13px; font-weight: 700;
+  color: var(--accent); padding: 11px 20px; cursor: pointer;
+  box-shadow: var(--nm-btn); transition: all 0.15s; white-space: nowrap;
+}
+.add-nm-btn:hover { box-shadow: 5px 5px 12px #a8bcd4, -5px -5px 12px #ffffff; }
+.add-nm-btn:active { box-shadow: var(--nm-btn-press); transform: scale(0.97); }
+
+/* ── TASKS AREA ── */
+#tasks-area { flex: 1; overflow-y: auto; padding: 18px 24px; }
+#tasks-area::-webkit-scrollbar { width: 4px; }
+#tasks-area::-webkit-scrollbar-thumb { background: #b0c4db; border-radius: 2px; }
+
+.task-nm {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--bg); border-radius: var(--r);
+  box-shadow: var(--nm-out);
+  padding: 13px 14px; margin-bottom: 11px;
+  transition: box-shadow 0.18s;
+  cursor: default;
+}
+.task-nm:hover { box-shadow: 8px 8px 18px #b0c4db, -8px -8px 18px #ffffff; }
+.task-nm.done-card { box-shadow: var(--nm-in); opacity: 0.6; }
+
+.chk-nm {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--bg); box-shadow: var(--nm-btn);
+  border: none; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px; transition: all 0.2s;
+}
+.chk-nm:hover { box-shadow: 5px 5px 12px #a8bcd4, -5px -5px 12px #ffffff; }
+.chk-nm.checked { box-shadow: var(--nm-in); }
+.chk-fill {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--accent); display: none;
+  box-shadow: 0 0 0 2px var(--bg-light);
+}
+.chk-nm.checked .chk-fill { display: block; }
+
+.t-body { flex: 1; min-width: 0; }
+.t-name { font-size: 14px; color: var(--text1); font-weight: 500; line-height: 1.4; word-break: break-word; }
+.t-name.struck { text-decoration: line-through; color: var(--text3); font-weight: 400; }
+.t-meta { display: flex; align-items: center; gap: 7px; margin-top: 5px; flex-wrap: wrap; }
+.t-dt { font-size: 11px; font-family: var(--mono); color: var(--text3); }
+.t-dt.ov { color: var(--coral); }
+.t-dt.sn { color: var(--amber); }
+.t-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+
+.t-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+.task-nm:hover .t-actions { opacity: 1; }
+
+.icon-nm {
+  background: var(--bg); border: none; border-radius: var(--rsm);
+  box-shadow: var(--nm-btn); color: var(--text3);
+  font-size: 14px; padding: 5px 7px; cursor: pointer;
+  transition: all 0.15s; line-height: 1; font-family: var(--font);
+}
+.icon-nm:hover { box-shadow: var(--nm-in); color: var(--text1); }
+.icon-nm.del:hover { color: var(--coral); }
+
+/* ── INLINE EDIT ── */
+.edit-nm {
+  background: var(--bg); border: none; border-radius: var(--rsm);
+  box-shadow: var(--nm-in); font-family: var(--font); font-size: 13px;
+  color: var(--text1); padding: 6px 10px; outline: none; width: 100%;
+}
+.edit-dt-nm {
+  background: var(--bg); border: none; border-radius: var(--rsm);
+  box-shadow: var(--nm-in); font-family: var(--mono); font-size: 11px;
+  color: var(--text2); padding: 4px 8px; outline: none; margin-top: 5px;
+}
+.save-nm {
+  background: var(--bg); border: none; border-radius: var(--rsm);
+  box-shadow: var(--nm-btn); font-family: var(--font); font-size: 12px;
+  font-weight: 700; color: var(--accent); padding: 5px 12px;
+  cursor: pointer; margin-top: 6px; margin-right: 5px; transition: all 0.15s;
+}
+.save-nm:hover { box-shadow: var(--nm-in); }
+.cancel-nm {
+  background: var(--bg); border: none; border-radius: var(--rsm);
+  box-shadow: var(--nm-btn); font-family: var(--font); font-size: 12px;
+  font-weight: 600; color: var(--text3); padding: 5px 12px;
+  cursor: pointer; margin-top: 6px; transition: all 0.15s;
+}
+.cancel-nm:hover { box-shadow: var(--nm-in); }
+
+/* ── EMPTY STATE ── */
+.empty-st { text-align: center; padding: 60px 0; color: var(--text3); font-size: 14px; }
+.empty-orb {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--bg); box-shadow: var(--nm-out);
+  margin: 0 auto 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: var(--text3);
+}
+
+/* ── STATS ── */
+#statsbar {
+  padding: 11px 24px;
+  border-top: 1px solid rgba(176,196,219,0.4);
+  display: flex; gap: 20px;
+  font-size: 11px; font-family: var(--mono); color: var(--text3);
+}
+.st { display: flex; align-items: center; gap: 5px; }
+.st-v { color: var(--text2); font-weight: 500; }
+
+/* ── MODAL ── */
+.modal-wrap {
+  position: fixed; inset: 0;
+  background: rgba(180,200,220,0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+}
+.modal-nm {
+  background: var(--bg);
+  border-radius: var(--rxl);
+  box-shadow: 14px 14px 32px #a0b8d0, -14px -14px 32px #ffffff;
+  padding: 28px 30px; width: 300px;
+}
+.modal-nm h3 { font-size: 16px; font-weight: 700; color: var(--text1); margin-bottom: 18px; }
+.modal-field {
+  background: var(--bg); border: none; border-radius: var(--rsm);
+  box-shadow: var(--nm-in); font-family: var(--font); font-size: 13px;
+  color: var(--text1); padding: 10px 12px; outline: none; width: 100%;
+  margin-bottom: 14px;
+}
+.swatches { display: flex; gap: 9px; margin-bottom: 18px; }
+.swatch-nm {
+  width: 24px; height: 24px; border-radius: 50%;
+  cursor: pointer; transition: all 0.15s;
+  box-shadow: var(--nm-btn);
+}
+.swatch-nm.on { box-shadow: var(--nm-in); transform: scale(0.88); }
+.modal-row { display: flex; gap: 8px; justify-content: flex-end; }
+.mbtn-cancel {
+  background: var(--bg); border: none; border-radius: var(--rsm);
+  font-family: var(--font); font-size: 13px; font-weight: 600;
+  color: var(--text3); padding: 9px 18px; cursor: pointer;
+  box-shadow: var(--nm-btn); transition: all 0.15s;
+}
+.mbtn-cancel:hover { box-shadow: var(--nm-in); }
+.mbtn-ok {
+  background: var(--bg); border: none; border-radius: var(--rsm);
+  font-family: var(--font); font-size: 13px; font-weight: 700;
+  color: var(--accent); padding: 9px 18px; cursor: pointer;
+  box-shadow: var(--nm-btn); transition: all 0.15s;
+}
+.mbtn-ok:hover { box-shadow: var(--nm-in); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  body { padding: 0; }
+  #app { width: 100vw; height: 100vh; border-radius: 0; box-shadow: none; flex-direction: column; }
+  #sidebar { width: 100%; min-width: unset; height: auto; flex-direction: row; flex-wrap: wrap; padding: 12px 12px 8px; border-right: none; border-bottom: 1px solid rgba(176,196,219,0.5); }
+  .logo-wrap { padding-bottom: 0; }
+  #nav-lists { display: flex; gap: 4px; flex-wrap: wrap; }
+  .sidebar-footer { margin-top: 0; border-top: none; padding-top: 0; }
+  .sec-label { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="logo-wrap">
+      <div class="logo-nm"><div class="logo-inner"></div></div>
+      <span class="logo-text">Tidō</span>
+    </div>
+
+    <div class="sec-label">Lists</div>
+    <div id="nav-lists"></div>
+
+    <button class="add-list-nm" onclick="openModal()">
+      <div class="plus-circle">+</div>
+      New list
+    </button>
+
+    <div class="sidebar-footer">
+      <div class="theme-row">
+        <span class="theme-lbl">Theme</span>
+        <div class="t-dot on" style="background:#2b8fd4" data-theme=""      title="Ocean"></div>
+        <div class="t-dot"    style="background:#7f77dd" data-theme="th-night" title="Night"></div>
+        <div class="t-dot"    style="background:#2aac74" data-theme="th-sage"  title="Sage"></div>
+        <div class="t-dot"    style="background:#d4537e" data-theme="th-rose"  title="Rose"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div id="topbar">
+      <span class="main-title" id="pg-title">All tasks</span>
+      <button class="filter-nm on" onclick="setF(this,'all')">All</button>
+      <button class="filter-nm"    onclick="setF(this,'active')">Active</button>
+      <button class="filter-nm"    onclick="setF(this,'done')">Done</button>
+      <button class="clear-nm"     onclick="clearDone()">Clear done</button>
+    </div>
+
+    <div id="add-bar">
+      <div class="add-nm-row">
+        <input class="nm-input" id="ti" placeholder="What needs doing?" onkeydown="if(event.key==='Enter')addTask()">
+        <input class="nm-dt" type="datetime-local" id="td">
+        <button class="add-nm-btn" onclick="addTask()">+ Add</button>
+      </div>
+    </div>
+
+    <div id="tasks-area"></div>
+
+    <div id="statsbar">
+      <div class="st">Total <span class="st-v" id="ss-t">0</span></div>
+      <div class="st">Done <span class="st-v" id="ss-d">0</span></div>
+      <div class="st">Left <span class="st-v" id="ss-r">0</span></div>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div id="modal-root"></div>
+</div>
+
+<script>
+const COLORS = ['#2b8fd4','#1aabaa','#7f77dd','#e06060','#e0a030','#2aac74','#d4537e'];
+
+const THEMES = {
+  '': {
+    '--bg':'#dce8f5','--bg-dark':'#c8d8ec','--bg-light':'#eaf3fd',
+    '--nm-out':'6px 6px 14px #b0c4db, -6px -6px 14px #ffffff',
+    '--nm-in':'inset 4px 4px 10px #b0c4db, inset -4px -4px 10px #ffffff',
+    '--nm-btn':'4px 4px 10px #b0c4db, -4px -4px 10px #ffffff',
+    '--nm-btn-press':'inset 3px 3px 8px #b0c4db, inset -3px -3px 8px #ffffff',
+    '--accent':'#2b8fd4','--teal':'#1aabaa','--coral':'#e06060','--amber':'#e0a030',
+    '--text1':'#1c3a5c','--text2':'#4a6a8a','--text3':'#7a9ab8',
+    '--body-bg':'#c8d8ec'
+  },
+  'th-night': {
+    '--bg':'#e0e4ef','--bg-dark':'#cdd2e4','--bg-light':'#edf0f8',
+    '--nm-out':'6px 6px 14px #b8bdd0, -6px -6px 14px #ffffff',
+    '--nm-in':'inset 4px 4px 10px #b8bdd0, inset -4px -4px 10px #ffffff',
+    '--nm-btn':'4px 4px 10px #b8bdd0, -4px -4px 10px #ffffff',
+    '--nm-btn-press':'inset 3px 3px 8px #b8bdd0, inset -3px -3px 8px #ffffff',
+    '--accent':'#534ab7','--teal':'#7f77dd','--coral':'#e06060','--amber':'#e0a030',
+    '--text1':'#1a1e3c','--text2':'#44496a','--text3':'#7880aa',
+    '--body-bg':'#cdd2e4'
+  },
+  'th-sage': {
+    '--bg':'#daeae0','--bg-dark':'#c4d8cb','--bg-light':'#ecf5ef',
+    '--nm-out':'6px 6px 14px #adc8b6, -6px -6px 14px #ffffff',
+    '--nm-in':'inset 4px 4px 10px #adc8b6, inset -4px -4px 10px #ffffff',
+    '--nm-btn':'4px 4px 10px #adc8b6, -4px -4px 10px #ffffff',
+    '--nm-btn-press':'inset 3px 3px 8px #adc8b6, inset -3px -3px 8px #ffffff',
+    '--accent':'#1a7a52','--teal':'#2aac74','--coral':'#e06060','--amber':'#e0a030',
+    '--text1':'#0f2d1e','--text2':'#3a6048','--text3':'#6a9878',
+    '--body-bg':'#c4d8cb'
+  },
+  'th-rose': {
+    '--bg':'#f0e0e6','--bg-dark':'#dccad2','--bg-light':'#faeef2',
+    '--nm-out':'6px 6px 14px #c8b0bb, -6px -6px 14px #ffffff',
+    '--nm-in':'inset 4px 4px 10px #c8b0bb, inset -4px -4px 10px #ffffff',
+    '--nm-btn':'4px 4px 10px #c8b0bb, -4px -4px 10px #ffffff',
+    '--nm-btn-press':'inset 3px 3px 8px #c8b0bb, inset -3px -3px 8px #ffffff',
+    '--accent':'#c0305a','--teal':'#d4537e','--coral':'#e06060','--amber':'#e0a030',
+    '--text1':'#3a0e1e','--text2':'#6a3448','--text3':'#9a6878',
+    '--body-bg':'#dccad2'
+  }
+};
+
+let lists = [
+  {id:'inbox',   name:'Inbox',    color:'#2b8fd4'},
+  {id:'work',    name:'Work',     color:'#1aabaa'},
+  {id:'personal',name:'Personal', color:'#7f77dd'},
+];
+let tasks = [
+  {id:1, name:'Review project proposal', listId:'work',     done:false, dt:'2026-04-08T10:00'},
+  {id:2, name:'Buy groceries',           listId:'personal', done:false, dt:''},
+  {id:3, name:'Setup dev environment',   listId:'work',     done:true,  dt:''},
+  {id:4, name:'Morning walk',            listId:'personal', done:false, dt:'2026-04-06T07:00'},
+];
+let nid = 10, activeList = 'all', activeFilter = 'all', editId = null, newColor = COLORS[0];
+
+/* ── THEME ── */
+function applyTheme(key) {
+  const vars = THEMES[key] || THEMES[''];
+  const root = document.documentElement;
+  for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v);
+  document.body.style.background = vars['--body-bg'];
+}
+
+/* ── PERSIST ── */
+function save() {
+  try {
+    localStorage.setItem('tido_tasks', JSON.stringify(tasks));
+    localStorage.setItem('tido_lists', JSON.stringify(lists));
+  } catch(e) {}
+}
+function load() {
+  try {
+    const t = localStorage.getItem('tido_tasks');
+    const l = localStorage.getItem('tido_lists');
+    if (t) tasks = JSON.parse(t);
+    if (l && JSON.parse(l).length) lists = JSON.parse(l);
+  } catch(e) {}
+}
+
+/* ── HELPERS ── */
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function getList(id) { return lists.find(l => l.id === id) || {name:'?', color:'#888'}; }
+
+function fmtDt(dt) {
+  if (!dt) return '';
+  const d = new Date(dt), now = new Date(), diff = d - now;
+  const abs = Math.abs(diff);
+  if (abs < 60000)     return 'Now';
+  if (abs < 3600000)   return (diff < 0 ? '-' : '') + Math.round(abs / 60000) + 'm';
+  if (abs < 86400000)  return (diff < 0 ? '-' : '') + Math.round(abs / 3600000) + 'h';
+  return d.toLocaleDateString('en-IN', {month:'short', day:'numeric'})
+       + ' ' + d.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', hour12:true});
+}
+function dtCls(dt) {
+  if (!dt) return '';
+  const diff = new Date(dt) - new Date();
+  if (diff < 0)          return 'ov';
+  if (diff < 14400000)   return 'sn';
+  return '';
+}
+function filteredTasks() {
+  let t = tasks;
+  if (activeList !== 'all') t = t.filter(x => x.listId === activeList);
+  if (activeFilter === 'active') t = t.filter(x => !x.done);
+  if (activeFilter === 'done')   t = t.filter(x => x.done);
+  return t;
+}
+
+/* ── RENDER ── */
+function renderNav() {
+  const el = document.getElementById('nav-lists');
+  const allLeft = tasks.filter(t => !t.done).length;
+  let h = `<div class="nav-item ${activeList==='all'?'active':''}" onclick="setList('all')">
+    <div class="nav-dot" style="background:linear-gradient(135deg,var(--accent),var(--teal))"></div>
+    <span class="nav-name">All tasks</span>
+    <span class="nav-count">${allLeft}</span>
+  </div>`;
+  lists.forEach(l => {
+    const c = tasks.filter(t => t.listId === l.id && !t.done).length;
+    h += `<div class="nav-item ${activeList===l.id?'active':''}" onclick="setList('${l.id}')">
+      <div class="nav-dot" style="background:${l.color}"></div>
+      <span class="nav-name">${esc(l.name)}</span>
+      <span class="nav-count">${c}</span>
+    </div>`;
+  });
+  el.innerHTML = h;
+}
+
+function renderTasks() {
+  const area = document.getElementById('tasks-area');
+  const ft = filteredTasks();
+  if (!ft.length) {
+    area.innerHTML = `<div class="empty-st">
+      <div class="empty-orb">&#10022;</div>
+      Nothing here yet
+    </div>`;
+    renderStats(); return;
+  }
+  area.innerHTML = ft.map(t => {
+    const l  = getList(t.listId);
+    const dt = fmtDt(t.dt);
+    const dc = dtCls(t.dt);
+
+    if (editId === t.id) {
+      return `<div class="task-nm" id="tc-${t.id}">
+        <button class="chk-nm ${t.done?'checked':''}" onclick="toggle(${t.id})">
+          <div class="chk-fill"></div>
+        </button>
+        <div class="t-body">
+          <input class="edit-nm" id="en-${t.id}" value="${esc(t.name)}"
+            onkeydown="if(event.key==='Enter')saveEdit(${t.id});if(event.key==='Escape')cancelEdit()">
+          <br>
+          <input class="edit-dt-nm" type="datetime-local" id="edt-${t.id}" value="${t.dt||''}">
+          <div>
+            <button class="save-nm"   onclick="saveEdit(${t.id})">Save</button>
+            <button class="cancel-nm" onclick="cancelEdit()">Cancel</button>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    return `<div class="task-nm ${t.done?'done-card':''}" id="tc-${t.id}">
+      <button class="chk-nm ${t.done?'checked':''}" onclick="toggle(${t.id})">
+        <div class="chk-fill"></div>
+      </button>
+      <div class="t-body">
+        <div class="t-name ${t.done?'struck':''}">${esc(t.name)}</div>
+        <div class="t-meta">
+          ${dt ? `<div class="t-dt ${dc}">&#9679; ${dt}</div>` : ''}
+          <div class="t-badge" style="background:${l.color}22;color:${l.color}">${esc(l.name)}</div>
+        </div>
+      </div>
+      <div class="t-actions">
+        <button class="icon-nm"     onclick="startEdit(${t.id})" title="Edit">&#9998;</button>
+        <button class="icon-nm del" onclick="delTask(${t.id})"   title="Delete">&#10005;</button>
+      </div>
+    </div>`;
+  }).join('');
+  renderStats();
+}
+
+function renderStats() {
+  const sc = activeList === 'all' ? tasks : tasks.filter(t => t.listId === activeList);
+  document.getElementById('ss-t').textContent = sc.length;
+  document.getElementById('ss-d').textContent = sc.filter(t => t.done).length;
+  document.getElementById('ss-r').textContent = sc.filter(t => !t.done).length;
+}
+
+function render() { renderNav(); renderTasks(); }
+
+/* ── ACTIONS ── */
+function setList(id) {
+  activeList = id;
+  document.getElementById('pg-title').textContent = id === 'all' ? 'All tasks' : getList(id).name;
+  render();
+}
+
+function setF(el, f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-nm').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  renderTasks();
+}
+
+function addTask() {
+  const inp = document.getElementById('ti');
+  const dt  = document.getElementById('td');
+  const name = inp.value.trim();
+  if (!name) { inp.focus(); return; }
+  const lid = activeList === 'all' ? (lists[0]?.id || 'inbox') : activeList;
+  tasks.unshift({id: nid++, name, listId: lid, done: false, dt: dt.value || ''});
+  inp.value = ''; dt.value = '';
+  save(); render();
+}
+
+function toggle(id) {
+  const t = tasks.find(x => x.id === id);
+  if (t) { t.done = !t.done; save(); render(); }
+}
+
+function delTask(id) {
+  tasks = tasks.filter(x => x.id !== id);
+  save(); render();
+}
+
+function startEdit(id) {
+  editId = id; renderTasks();
+  setTimeout(() => document.getElementById('en-' + id)?.focus(), 50);
+}
+
+function cancelEdit() { editId = null; renderTasks(); }
+
+function saveEdit(id) {
+  const t = tasks.find(x => x.id === id);
+  if (t) {
+    t.name = document.getElementById('en-' + id)?.value.trim() || t.name;
+    t.dt   = document.getElementById('edt-' + id)?.value || '';
+  }
+  editId = null; save(); render();
+}
+
+function clearDone() {
+  if (activeList === 'all') tasks = tasks.filter(t => !t.done);
+  else tasks = tasks.filter(t => !(t.done && t.listId === activeList));
+  save(); render();
+}
+
+/* ── MODAL ── */
+function openModal() {
+  newColor = COLORS[0];
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-wrap" onclick="if(event.target===this)closeModal()">
+      <div class="modal-nm">
+        <h3>New list</h3>
+        <input class="modal-field" id="ml-n" placeholder="List name…"
+          onkeydown="if(event.key==='Enter')confirmList()">
+        <div class="swatches" id="ml-sw">
+          ${COLORS.map((c,i) => `<div class="swatch-nm ${i===0?'on':''}" style="background:${c}"
+            onclick="pickC('${c}',this)"></div>`).join('')}
+        </div>
+        <div class="modal-row">
+          <button class="mbtn-cancel" onclick="closeModal()">Cancel</button>
+          <button class="mbtn-ok"     onclick="confirmList()">Create</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(() => document.getElementById('ml-n')?.focus(), 50);
+}
+
+function pickC(c, el) {
+  newColor = c;
+  document.querySelectorAll('#ml-sw .swatch-nm').forEach(s => s.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function confirmList() {
+  const n = document.getElementById('ml-n')?.value.trim();
+  if (!n) return;
+  const id = 'l_' + Date.now();
+  lists.push({id, name: n, color: newColor});
+  closeModal(); save(); setList(id);
+}
+
+function closeModal() { document.getElementById('modal-root').innerHTML = ''; }
+
+/* ── THEME SWITCHER ── */
+document.querySelectorAll('.t-dot').forEach(d => {
+  d.addEventListener('click', function () {
+    const th = this.dataset.theme || '';
+    applyTheme(th);
+    document.querySelectorAll('.t-dot').forEach(x => x.classList.remove('on'));
+    this.classList.add('on');
+  });
+});
+
+/* ── INIT ── */
+load();
+applyTheme('');
+render();
+</script>
+</body>
+</html>
